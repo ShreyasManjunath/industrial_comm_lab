@@ -11,11 +11,18 @@
 
 #include <cstdint>
 
-namespace industrial_tcp {
-enum class MessageType : uint16_t { HEARTBEAT = 1, COMMAND = 2, STATUS = 3 };
+namespace industrial_tcp
+{
+enum class MessageType : uint16_t
+{
+  HEARTBEAT = 1,
+  COMMAND = 2,
+  STATUS = 3
+};
 
 #pragma pack(push, 1)
-struct Header {
+struct Header
+{
   uint16_t type;    // Message type
   uint32_t length;  // Length of the payload
 };

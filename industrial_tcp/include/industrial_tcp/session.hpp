@@ -14,40 +14,50 @@
 
 using boost::asio::ip::tcp;
 
-namespace industrial_tcp {
-class Session : public std::enable_shared_from_this<Session> {
- public:
-  explicit Session(tcp::socket socket) : socket_(std::move(socket)) {}
-  void start() { do_read_header(); }
-
- private:
-  void do_read_header() {
-    auto self(shared_from_this());
-    boost::asio::async_read(
-        socket_, boost::asio::buffer(&header_, sizeof(header_)),
-        [this, self](boost::system::error_code ec, std::size_t /*length*/) {
-          if (!ec) {
-            header_.length = ntohl(header_.length);
-            payload_.resize(header_.length);
-            do_read_payload();
-          }
-        });
+namespace industrial_tcp
+{
+class Session : public std::enable_shared_from_this<Session>
+{
+public:
+  explicit Session(tcp::socket socket) : socket_(std::move(socket))
+  {
   }
-  void do_read_payload() {
+  void start()
+  {
+    do_read_header();
+  }
+
+private:
+  void do_read_header()
+  {
+    auto self(shared_from_this());
+    boost::asio::async_read(socket_,
+                            boost::asio::buffer(&header_, sizeof(header_)),
+                            [this, self](boost::system::error_code ec, std::size_t /*length*/) {
+                              if (!ec)
+                              {
+                                header_.length = ntohl(header_.length);
+                                payload_.resize(header_.length);
+                                do_read_payload();
+                              }
+                            });
+  }
+  void do_read_payload()
+  {
     auto self(shared_from_this());
     boost::asio::async_read(
-        socket_, boost::asio::buffer(payload_),
-        [this, self](boost::system::error_code ec, std::size_t /*length*/) {
-          if (!ec) {
+        socket_, boost::asio::buffer(payload_), [this, self](boost::system::error_code ec, std::size_t /*length*/) {
+          if (!ec)
+          {
             handle_message();
             do_read_header();
           }
         });
   }
-  void handle_message() {
+  void handle_message()
+  {
     // Process the message based on its type
-    std::cout << "Received message of type: " << header_.type
-              << ", length: " << header_.length << std::endl;
+    std::cout << "Received message of type: " << header_.type << ", length: " << header_.length << std::endl;
   }
 
   // Member variables

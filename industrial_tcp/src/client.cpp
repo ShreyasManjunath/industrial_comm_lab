@@ -10,8 +10,10 @@
 
 using boost::asio::ip::tcp;
 
-void run_client() {
-  try {
+void run_client()
+{
+  try
+  {
     boost::asio::io_context io_context;
 
     tcp::socket socket(io_context);
@@ -21,17 +23,19 @@ void run_client() {
         8080,
     });  // Connect to server
 
-    auto frame = industrial_tcp::framing::make_frame(
-        industrial_tcp::MessageType::HEARTBEAT,
-        {});  // Empty payload for heartbeat
+    auto frame =
+        industrial_tcp::framing::make_frame(industrial_tcp::MessageType::HEARTBEAT, {});  // Empty payload for heartbeat
     boost::asio::write(socket, boost::asio::buffer(frame));
     std::cout << "Sent HEARTBEAT frame to server\n";
-  } catch (std::exception& e) {
+  }
+  catch (std::exception& e)
+  {
     std::cerr << "Exception: " << e.what() << "\n";
   }
 }
 
-int main() {
+int main()
+{
   run_client();
   return 0;
 }

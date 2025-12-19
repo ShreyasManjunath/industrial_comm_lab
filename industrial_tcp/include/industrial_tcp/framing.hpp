@@ -9,9 +9,10 @@
 
 #include "industrial_tcp/protocol.h"
 
-namespace industrial_tcp::framing {
-inline std::vector<uint8_t> make_frame(MessageType type,
-                                       const std::vector<uint8_t>& payload) {
+namespace industrial_tcp::framing
+{
+inline std::vector<uint8_t> make_frame(MessageType type, const std::vector<uint8_t>& payload)
+{
   Header header;
   header.type = static_cast<uint16_t>(type);
   header.length = static_cast<uint32_t>(payload.size());
