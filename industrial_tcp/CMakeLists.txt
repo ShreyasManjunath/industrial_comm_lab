@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(industrial_tcp LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find ROS2 and Boost
@@ -46,6 +46,14 @@ install(TARGETS tcp_server tcp_client
 install(DIRECTORY include/
   DESTINATION include/${PROJECT_NAME}
 )
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_framing test/test_framing.cpp)
+  ament_target_dependencies(test_framing
+    Boost
+  )
+endif()
 
 # Export package
 ament_package()

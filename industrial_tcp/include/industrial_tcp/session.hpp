@@ -5,6 +5,8 @@
 
 #pragma once
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <cstdint>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -19,11 +21,13 @@ namespace industrial_tcp
 class Session : public std::enable_shared_from_this<Session>
 {
 public:
-  explicit Session(tcp::socket socket) : socket_(std::move(socket))
+  explicit Session(tcp::socket socket) : socket_(std::move(socket)), watchdog_(socket_.get_executor())
   {
   }
   void start()
   {
+    std::cout << "[SERVER] Session started\n";
+    start_watchdog();
     do_read_header();
   }
 
@@ -58,11 +62,45 @@ private:
   {
     // Process the message based on its type
     std::cout << "Received message of type: " << header_.type << ", length: " << header_.length << std::endl;
+    if (header_.type == std::to_underlying(MessageType::HEARTBEAT))  // to_underlying requires C++23
+    {
+      std::cout << "[SERVER] Watchdog reset\n";
+      watchdog_.expires_after(timeout_);
+    }
+  }
+
+  void start_watchdog()
+  {
+    std::cout << "[SERVER] Watchdog started\n";
+    watchdog_.expires_after(timeout_);
+    watchdog_.async_wait([self = shared_from_this()](const boost::system::error_code& ec) {
+      if (ec == boost::asio::error::operation_aborted)
+      {
+        // Timer was reset — re-arm it
+        self->start_watchdog();
+        return;
+      }
+      if (!ec)
+      {
+        std::cout << "[SERVER] Connection timed out due to inactivity. Timemout is set to 5s.\n";
+        std::cout << "[SERVER] Watchdog expired\n";
+        boost::asio::post(self->socket_.get_executor(), [self]() {
+          self->socket_.cancel();
+          self->socket_.close();
+        });
+      }
+      else
+      {
+        std::cout << "[SERVER] Watchdog cancelled/reset\n";
+      }
+    });
   }
 
   // Member variables
   tcp::socket socket_;
   Header header_;
   std::vector<uint8_t> payload_;
+  boost::asio::steady_timer watchdog_;
+  std::chrono::seconds timeout_{ 5 };
 };
 }  // namespace industrial_tcp
