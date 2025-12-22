@@ -82,7 +82,22 @@ Detailed build and run instructions will be added **after the core architecture 
 - Basic connection works
 - Headers & include structure set up
 
-**Next Milestones:** 2. Heartbeats & watchdog timers 3. Command/response protocol 4. Multi-threaded `io_context` 5. Reconnect & fault handling 6. UDP communication path 7. Protocol versioning 8. Integration patterns (non-RT + RT split)
+**Milestone 2 (Complete): Heartbeats & Watchdog Timers**
+
+- Client sends periodic HEARTBEAT frames to the server
+- Server monitors each session with a watchdog timer
+- Watchdog resets on heartbeat receipt and expires after inactivity
+- Safe asynchronous socket closure on timeout (no crashes)
+- Unit tests for framing, heartbeat, and network byte order validation
+- Verified robustness with Boost.Asio async timers
+
+**Next Milestones:**
+3. Command/response protocol with robust framing (handling partial TCP reads)
+4. Multi-threaded `io_context`
+5. Reconnect & fault handling
+6. UDP communication path
+7. Protocol versioning
+8. Integration patterns (non-RT + RT split)
 
 Later stages may explore:
 
