@@ -47,5 +47,13 @@ install(DIRECTORY include/
   DESTINATION include/${PROJECT_NAME}
 )
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_framing test/test_framing.cpp)
+  ament_target_dependencies(test_framing
+    Boost
+  )
+endif()
+
 # Export package
 ament_package()
