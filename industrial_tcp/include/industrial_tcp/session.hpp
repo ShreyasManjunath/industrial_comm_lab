@@ -61,8 +61,9 @@ private:
   void handle_message()
   {
     // Process the message based on its type
-    std::cout << "Received message of type: " << header_.type << ", length: " << header_.length << std::endl;
-    if (header_.type == std::to_underlying(MessageType::HEARTBEAT))  // to_underlying requires C++23
+    std::cout << "Received message of type: " << ntohs(header_.type) << ", length: " << ntohl(header_.length)
+              << std::endl;
+    if (ntohs(header_.type) == std::to_underlying(MessageType::HEARTBEAT))  // to_underlying requires C++23
     {
       std::cout << "[SERVER] Watchdog reset\n";
       watchdog_.expires_after(timeout_);
